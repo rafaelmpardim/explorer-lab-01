@@ -18,9 +18,7 @@ function setCardType(type) {
   ccLogo.setAttribute('src', `cc-${type}.svg`)
 }
 
-globalThis.setCardType = setCardType
-
-const cardControll = {
+const card = {
   expirationDate: {
     input: document.getElementById('expiration-date'),
     pattern: {
@@ -41,7 +39,9 @@ const cardControll = {
   },
   holder: {
     input: document.getElementById('card-holder'),
-    pattern: {}
+    pattern: {
+      mask: /^[A-z,\s]{0,35}$/
+    }
   },
   number: {
     input: document.getElementById('card-number'),
@@ -78,9 +78,40 @@ const cardControll = {
   }
 }
 
-const cardExpirationDateMasked = IMask(cardControll.expirationDate.input, cardControll.expirationDate.pattern)
-// const cardHolderMasked = IMask(cardControll.holder.input, cardControll.holder.pattern)
-const cardNumberMasked = IMask(cardControll.number.input, cardControll.number.pattern)
-const cardSecutityCodeMasked = IMask(cardControll.securityCode.input, cardControll.securityCode.pattern)
+const cardExpirationDateMasked = IMask(card.expirationDate.input, card.expirationDate.pattern)
+const cardHolderMasked = IMask(card.holder.input, card.holder.pattern)
+const cardNumberMasked = IMask(card.number.input, card.number.pattern)
+const cardSecurityCodeMasked = IMask(card.securityCode.input, card.securityCode.pattern)
 
-console.log(cardSecutityCodeMasked)
+const addButton = document.getElementById('add-card')
+
+addButton.addEventListener('click', () => {
+  alert('Cartão adicionado')
+})
+
+document.querySelector('form').addEventListener('submit', event => {
+  event.preventDefault()
+})
+
+cardExpirationDateMasked.on('accept', () => {
+  updateCardValues('.cc-expiration .value', '02/32', cardExpirationDateMasked.value)
+})
+
+cardNumberMasked.on('accept', () => {
+  const cardType = cardNumberMasked.masked.currentMask.cardtype
+  setCardType(cardType)
+  updateCardValues('.cc-number', '1234 5678 9012 3456', cardNumberMasked.value)
+})
+
+cardHolderMasked.on('accept', () => {
+  updateCardValues('.cc-holder .value', 'FULANO DA SILVA', cardHolderMasked.value)
+})
+
+cardSecurityCodeMasked.on('accept', () => {
+  updateCardValues('.cc-security .value', '123', cardSecurityCodeMasked.value)
+})
+
+function updateCardValues(field, defaultValue, newValue) {
+  const fieldRef = document.querySelector(field)
+  fieldRef.innerText = newValue.length === 0 ? defaultValue : newValue
+}
